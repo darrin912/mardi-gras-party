@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mardi Gras Murder Mystery — Guest List</title>
+  <meta name="description" content="Step into a New Orleans night of intrigue. Meet the colorful cast of characters attending the Governor’s Mardi Gras Gala.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --purple:#5e2a84;
+      --green:#1d8c4b;
+      --gold:#d4af37;
+      --muted:#9b8fc0;
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:"Montserrat",sans-serif; background:linear-gradient(180deg,#0a0814,#0b0820 60%,#0a0824); color:#fff}
+    h1{font-family:"Cinzel Decorative",serif}
+
+    .grid{max-width:1200px; margin:28px auto 120px; padding:0 18px; display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:22px}
+    .card{background:linear-gradient(180deg,rgba(21,18,38,.9),rgba(12,10,22,.9)); border:1px solid rgba(212,175,55,.25); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; transition:.2s}
+    .card:hover{transform:translateY(-4px); box-shadow:0 14px 32px rgba(0,0,0,.55)}
+    .card-head{padding:18px; text-align:center}
+    .avatar{ width:110px; height:110px; border-radius:50%; overflow:hidden; border: 2px solid rgba(212,175,55,.5); box-shadow: 0 6px 16px rgba(0,0,0,.45); margin:0 auto 10px; }
+    .avatar img{width:100%; height:100%; object-fit:cover}
+    .title{font-weight:800; font-size:1.2rem; margin:8px 0 4px}
+    .name{color:var(--muted); font-weight:600; margin:0}
+    .badge{display:inline-block; margin-top:10px; padding:6px 12px; border-radius:999px; font-weight:700; font-size:.85rem; background:rgba(212,175,55,.14); border:1px solid rgba(212,175,55,.35); color:#ffefb8}
+    .card-footer{text-align:center; padding:12px 18px 18px}
+    .more{background:transparent; border:1px solid rgba(212,175,55,.35); color:#ffefb8; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700}
+
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(6,4,12,.6); z-index:100}
+    .modal.open{display:flex}
+    .modal-card{width:min(900px,96vw); max-height:86vh; overflow:auto; background:linear-gradient(180deg,rgba(21,18,38,.98),rgba(12,10,22,.98)); border:1px solid rgba(212,175,55,.35); border-radius:16px; box-shadow:var(--shadow)}
+    .modal-head{display:flex; gap:12px; align-items:center; padding:14px 16px; border-bottom:1px solid rgba(212,175,55,.2)}
+    .modal-head .avatar{width:72px; height:72px}
+    .modal-body{padding:16px}
+    .modal-close{margin-left:auto; background:transparent; border:1px solid rgba(255,255,255,.18); color:#fff; padding:8px 10px; border-radius:10px; cursor:pointer; font-weight:700}
+  </style>
+</head>
+<body>
+  <main id="guest-list" class="grid"></main>
+
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="avatar"><img id="modal-avatar" src="" alt=""></div>
+        <div>
+          <h2 id="modal-title" class="title">Title</h2>
+          <p id="modal-name" class="name">Name</p>
+          <span id="modal-badge" class="badge"></span>
+        </div>
+        <button class="modal-close" id="modal-close">Close</button>
+      </div>
+      <div class="modal-body"><p id="modal-bio"></p></div>
+    </div>
+  </div>
+
+  <script>
+    const GUESTS = [
+      { title:"The Governor", name:"Marshall Inglewood", role:"Guest", bio:"Governor of Louisiana who is hosting a Mardi Gras party. He’s well known in New Orleans for his constant fundraising and elegant parties.", img:"images/governor.png" },
+      { title:"The Voodoo Queen", name:"Dominique LaBranche", role:"Guest", bio:"Well known in New Orleans for her many “reading” parlors and Hoodoo supply stores. Her readings are said to be very accurate.", img:"images/voodoo-queen.png" },
+      { title:"The Queen Bee", name:"Blanche Duluth", role:"Guest", bio:"The reigning social queen of New Orleans elite society. She is a member of the prestigious Duluth family and is well known for her iron fist inside a lacy glove.", img:"images/queen-bee.png" },
+      { title:"The Sheriff", name:"Jacques “Jack” Le Boeuf", role:"Guest", bio:"Sheriff Jack is a fixture in New Orleans, as he investigates most crimes in the city. He’s known for his down-home approach.", img:"images/sheriff.png" },
+      { title:"The Lawyer", name:"Gabrielle Le Boeuf", role:"Guest", bio:"Miss Gabrielle is known to be sharp as a tack and a terror in the courtroom. She’s utterly ruthless behind her sweet Southern manners.", img:"images/lawyer.png" },
+      { title:"The Deputy", name:"Jeremy “J” Porter", role:"Guest", bio:"Deputy J is a notorious playboy, but is very loyal to the Sheriff’s Office and his city.", img:"images/deputy.png" },
+      { title:"The Hippie", name:"Celine “Luna” Schumacher", role:"Guest", bio:"Deputy Porter’s date, Luna is a big believer in “green initiatives,” but appears to legitimately like Deputy J.", img:"images/hippie.png" },
+      { title:"The Club Owner", name:"Derek Nordhart", role:"Guest", bio:"Derek owns “Fantasy” a very popular club that is known for its exclusive parties and open dance floor.", img:"images/club-owner.png" },
+      { title:"The Bouncer", name:"Sarah Corrington", role:"Staff", bio:"Bouncer at “Fantasy,” many underestimate her in her high heels, but she’s broken plenty of bones.", img:"images/bouncer.png" },
+      { title:"The Good Guy", name:"Harvey Daniels", role:"Guest", bio:"Harvey manages the day-to-day affairs for Leon’s construction firm and is known for his “good ol’boy” attitude.", img:"images/good-guy.png" },
+      { title:"The Architect", name:"Leon D’Loupe", role:"Guest", bio:"Mr. D’Loupe runs the largest construction firm in town and is largely responsible for most of the restoration to the city as it recovered from the latest hurricane.", img:"images/architect.png" },
+      { title:"The New Girl", name:"Heather Le Bois", role:"Guest", bio:"Miss Heather just bought a large mansion on the outskirts of town and has thrown several lavish parties.", img:"images/new-girl.png" },
+      { title:"The Bodyguard", name:"“Jack”", role:"Staff", bio:"Heather’s bodyguard, he doesn’t say much.", img:"images/bodyguard.png" },
+      { title:"Host / Head Caterer", name:"Tony Cour", role:"Staff", bio:"Tony runs one of the most successful restaurant/catering businesses in New Orleans. (Played by the Hostess)", img:"images/caterer.png" },
+      { title:"The Head Chef", name:"Noel Bellenuit", role:"Staff", bio:"Chef Noel is a dramatic, flamboyant and difficult man, but his food is so good even the most conservative members of high society don’t complain.", img:"images/head-chef.png" },
+      { title:"The Chef", name:"Rene Le Boeuf", role:"Staff", bio:"Rene served in the war and returned home recently where he got a job as a chef.", img:"images/chef.png" },
+      { title:"Waitress", name:"Jaquelyn D’Argent", role:"Staff", bio:"A waitress, she is new to the staff. She somehow always lands on her feet and is not afraid to grease the wheels that need greasing.", img:"images/waitress.png" },
+      { title:"The Bartender", name:"Crystal La Terre", role:"Staff", bio:"Crystal’s cocktails are legendary in New Orleans and so is her quick mouth and bad temper.", img:"images/bartender.png" },
+      { title:"The Preacher", name:"Joseph Grant", role:"Guest", bio:"Reverend Joseph is the preacher at the Sacred Heart, a rapidly growing mega church.", img:"images/preacher.png" },
+      { title:"The Preacher’s Wife", name:"Lettie Mae La Terre", role:"Guest", bio:"Reverend Joseph’s wife, and a member of his church. There are hints of some sort of scandal in her past.", img:"images/preachers-wife.png" },
+    ];
+
+    const grid=document.querySelector('.grid');
+    const modal=document.getElementById('modal');
+    const modalAvatar=document.getElementById('modal-avatar');
+    const modalTitle=document.getElementById('modal-title');
+    const modalName=document.getElementById('modal-name');
+    const modalBio=document.getElementById('modal-bio');
+    const modalBadge=document.getElementById('modal-badge');
+
+    function avatarFallback(title){
+      const initials=title.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      return `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='${'#5e2a84'}'/><text x='50%' y='57%' font-family='Montserrat' font-size='48' text-anchor='middle' fill='#ffefb8' font-weight='800'>${initials}</text></svg>`)} `;
+    }
+
+    function cardTemplate(g,i){
+      const img = g.img || '';
+      const avatarSrc = img || avatarFallback(g.title);
+      return `
+        <article class="card">
+          <div class="card-head">
+            <div class="avatar"><img src="${avatarSrc}" alt="${g.title} avatar"></div>
+            <h3 class="title">${g.title}</h3>
+            <p class="name">${g.name}</p>
+            <span class="badge">${g.role || 'Guest'}</span>
+          </div>
+          <div class="card-footer">
+            <button class="more" data-idx="${i}">More details</button>
+            <span aria-hidden="true">🎭</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function render(list){
+      grid.innerHTML = list.map((g,i)=>cardTemplate(g,i)).join('');
+      grid.querySelectorAll('.more').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const idx = Number(e.currentTarget.getAttribute('data-idx'));
+          const item = GUESTS[idx];
+          modalTitle.textContent = item.title;
+          modalName.textContent = item.name;
+          modalBio.textContent = item.bio;
+          modalBadge.textContent = item.role || 'Guest';
+          modalAvatar.src = item.img || avatarFallback(item.title);
+          modalAvatar.alt = item.title + ' avatar';
+          modal.classList.add('open');
+        });
+      });
+    }
+    render(GUESTS);
+
+    document.getElementById('modal-close').onclick=()=>modal.classList.remove('open');
+    modal.onclick=e=>{if(e.target===modal)modal.classList.remove('open')};
+    window.addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('open')});
+  </script>
+</body>
+</html>
